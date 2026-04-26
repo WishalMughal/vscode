@@ -6,6 +6,8 @@ import Announcement from "./Announcement.js";
 import Book from "./Book.js";
 import Zikar from "./Zikar.js";
 import Contact from "./Contact.js";
+import MasjidTiming from "./MasjidTiming.js";
+import PrivacyPolicy from "./PrivacyPolicy.js";
 
 // Associations
 User.hasMany(Student, { foreignKey: "createdBy" });
@@ -33,3 +35,4 @@ export const syncDB = async () => {
 };
 
 export { User, Student, Bayan, Announcement, Book, Zikar, Contact };
+export { MasjidTiming, PrivacyPolicy };

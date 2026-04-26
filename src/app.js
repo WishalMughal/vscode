@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+
 import authRoutes from "./routes/authRoutes.js";
 import bayanRoutes from "./routes/bayanRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
@@ -11,14 +12,20 @@ import quranRoutes from "./routes/quranRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import weatherRoutes from "./routes/weatherRoutes.js";
 import youtubeRoutes from "./routes/youtubeRoutes.js";
+import adminContentRoutes from "./routes/adminContentRoutes.js"; // ✅ add
+
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => res.json({ ok: true, service: "Islamic Academy API (Phase A)" }));
+app.get("/", (req, res) =>
+  res.json({ ok: true, service: "Islamic Academy API (Phase A)" })
+);
 
+// ✅ All routes
 app.use("/api/auth", authRoutes);
 app.use("/api/bayans", bayanRoutes);
 app.use("/api/announcements", announcementRoutes);
@@ -31,5 +38,10 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/weather", weatherRoutes);
 app.use("/api/youtube", youtubeRoutes);
 
+// 🔥 NEW ROUTE (IMPORTANT)
+app.use("/api/admin-content", adminContentRoutes);
+
+// ❗ Always last
 app.use(errorHandler);
+
 export default app;
