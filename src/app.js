@@ -12,8 +12,9 @@ import quranRoutes from "./routes/quranRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import weatherRoutes from "./routes/weatherRoutes.js";
 import youtubeRoutes from "./routes/youtubeRoutes.js";
-import adminContentRoutes from "./routes/adminContentRoutes.js"; // ✅ add
+import adminContentRoutes from "./routes/adminContentRoutes.js";
 
+import { PrivacyPolicy } from "./models/index.js"; // ✅ ADD THIS
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -25,7 +26,63 @@ app.get("/", (req, res) =>
   res.json({ ok: true, service: "Islamic Academy API (Phase A)" })
 );
 
-// ✅ All routes
+// ===================== ✅ PUBLIC PRIVACY POLICY PAGE =====================
+app.get("/privacy-policy", async (req, res) => {
+  try {
+    const policy = await PrivacyPolicy.findOne({
+      order: [["updatedAt", "DESC"]],
+    });
+
+    const title = policy?.title || "Privacy Policy";
+    const content =
+      policy?.content ||
+      "Privacy policy content will be updated soon.";
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${title}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background: #f6f8fb;
+            color: #222;
+            line-height: 1.7;
+            padding: 24px;
+            max-width: 900px;
+            margin: auto;
+          }
+          .card {
+            background: white;
+            padding: 28px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+          }
+          h1 { color: #0D8B6F; }
+          pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1>${title}</h1>
+          <pre>${content}</pre>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (e) {
+    res.status(500).send("Failed to load privacy policy");
+  }
+});
+// ========================================================================
+
+// ✅ All API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/bayans", bayanRoutes);
 app.use("/api/announcements", announcementRoutes);
@@ -38,7 +95,6 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/weather", weatherRoutes);
 app.use("/api/youtube", youtubeRoutes);
 
-// 🔥 NEW ROUTE (IMPORTANT)
 app.use("/api/admin-content", adminContentRoutes);
 
 // ❗ Always last
