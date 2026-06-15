@@ -30,7 +30,7 @@ User.hasMany(Zikar, { foreignKey: "createdBy" });
 Zikar.belongsTo(User, { foreignKey: "createdBy" });
 
 export const syncDB = async () => {
-  await sequelize.sync({ alter: true }); // dev only
+  await sequelize.sync(); // dev only
   console.log("🗃️  All models synced");
 };
 

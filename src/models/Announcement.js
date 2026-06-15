@@ -29,6 +29,12 @@ Announcement.init(
       },
     },
 
+    // ✅ NEW: image for announcement (store URL or file path)
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
