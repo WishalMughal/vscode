@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { auth } from "../middleware/auth.js";
+import { listStudents, getMyStudentRecord, createAdmission, createRenewal, updateStudent } from "../controllers/studentController.js";
+const router = Router();
+router.get("/", auth(["admin"]), listStudents);
+router.get("/me", auth(["student","admin"]), getMyStudentRecord);
+router.post("/admission", auth(["student","admin"]), createAdmission);
+router.post("/renewal", auth(["student","admin"]), createRenewal);
+router.patch("/:id", auth(["admin"]), updateStudent);
+export default router;
