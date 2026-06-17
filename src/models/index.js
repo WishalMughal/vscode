@@ -13,7 +13,7 @@ import PrivacyPolicy from "./PrivacyPolicy.js";
 User.hasMany(Student, { foreignKey: "createdBy" });
 Student.belongsTo(User, { foreignKey: "createdBy" });
 
-// Student profile ownership (student user -> their own record)
+// Student profile ownership
 User.hasOne(Student, { foreignKey: "userId", as: "studentProfile" });
 Student.belongsTo(User, { foreignKey: "userId", as: "user" });
 
@@ -30,18 +30,9 @@ User.hasMany(Zikar, { foreignKey: "createdBy" });
 Zikar.belongsTo(User, { foreignKey: "createdBy" });
 
 export const syncDB = async () => {
-<<<<<<< HEAD
   await sequelize.sync();
   console.log("🗃️ All models synced");
 };
 
 export { User, Student, Bayan, Announcement, Book, Zikar, Contact };
 export { MasjidTiming, PrivacyPolicy };
-=======
-  await sequelize.sync(); // dev only
-  console.log("🗃️  All models synced");
-};
-
-export { User, Student, Bayan, Announcement, Book, Zikar, Contact };
-export { MasjidTiming, PrivacyPolicy };
->>>>>>> 6cf5ef39eebe380920af025b9644c3a660a140ba

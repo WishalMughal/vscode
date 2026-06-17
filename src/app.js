@@ -21,10 +21,8 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-<<<<<<< HEAD
 app.use(express.urlencoded({ extended: true }));
-=======
->>>>>>> 6cf5ef39eebe380920af025b9644c3a660a140ba
+
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) =>
