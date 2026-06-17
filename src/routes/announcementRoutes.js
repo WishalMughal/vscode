@@ -1,36 +1,17 @@
 import { Router } from "express";
 import { auth } from "../middleware/auth.js";
 import multer from "multer";
-
-import {
-  listAnnouncements,
-  createAnnouncement,
-} from "../controllers/announcementController.js";
-
+import fs from "fs";
+import path from "path";
+import { listAnnouncements, createAnnouncement } from "../controllers/announcementController.js";
 const router = Router();
-
-// ✅ Multer setup (basic local storage)
+const uploadPath = "uploads/announcements";
+if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath,{recursive:true});
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/announcements");
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + "-" + file.originalname;
-    cb(null, uniqueName);
-  },
+ destination:(req,file,cb)=>cb(null,uploadPath),
+ filename:(req,file,cb)=>cb(null,Date.now()+"-"+Math.round(Math.random()*1e9)+path.extname(file.originalname))
 });
-
-const upload = multer({ storage });
-
-// ✅ GET all announcements (public or admin)
+const upload=multer({storage,limits:{fileSize:5*1024*1024}});
 router.get("/", listAnnouncements);
-
-// ✅ CREATE announcement (admin only + image upload)
-router.post(
-  "/",
-  auth(["admin"]),
-  upload.single("image"), // 👈 image field from admin form
-  createAnnouncement
-);
-
+router.post("/", auth(["admin"]), upload.single("image"), createAnnouncement);
 export default router;
