@@ -42,9 +42,10 @@ Announcement.init(
     },
 
     createdBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
+  type: DataTypes.INTEGER,
+  allowNull: true,
+  field: "createdBy",
+},
   },
   {
     sequelize,
