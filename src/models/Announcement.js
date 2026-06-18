@@ -29,7 +29,6 @@ Announcement.init(
       },
     },
 
-    // ✅ NEW: image for announcement (store URL or file path)
     image: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -42,17 +41,18 @@ Announcement.init(
     },
 
     createdBy: {
-  type: DataTypes.INTEGER,
-  allowNull: true,
-  field: "createdBy",
-},
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "createdBy",
+    },
   },
   {
     sequelize,
     modelName: "Announcement",
     tableName: "announcements",
     timestamps: true,
-    underscored: true,
+
+   
   }
 );
 
