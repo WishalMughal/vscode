@@ -8,7 +8,7 @@ export const listAnnouncements = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
-    return res.json(data);
+    return res.status(200).json(data);
   } catch (error) {
     console.error("List Announcement Error:", error);
     return res.status(500).json({
@@ -20,7 +20,21 @@ export const listAnnouncements = async (req, res) => {
 // CREATE
 export const createAnnouncement = async (req, res) => {
   try {
-    const { title, message, active = true } = req.body;
+    console.log("ANNOUNCEMENT BODY:", req.body);
+    console.log("ANNOUNCEMENT FILE:", req.file);
+    console.log("ANNOUNCEMENT USER:", req.user);
+
+    const title = (req.body.title || "").toString().trim();
+    const message = (req.body.message || "").toString().trim();
+    const activeValue = req.body.active;
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!message) {
+      return res.status(400).json({ message: "Message is required" });
+    }
 
     const image = req.file
       ? `/uploads/announcements/${req.file.filename}`
@@ -31,14 +45,19 @@ export const createAnnouncement = async (req, res) => {
       message,
       image,
       active:
-        active === true ||
-        active === "true" ||
-        active === 1 ||
-        active === "1",
+        activeValue === undefined || activeValue === null
+          ? true
+          : activeValue === true ||
+            activeValue === "true" ||
+            activeValue === 1 ||
+            activeValue === "1",
       createdBy: req.user?.id || null,
     });
 
-    return res.status(201).json(item);
+    return res.status(201).json({
+      message: "Announcement saved successfully",
+      data: item,
+    });
   } catch (error) {
     console.error("Create Announcement Error:", error);
     return res.status(500).json({
@@ -50,6 +69,9 @@ export const createAnnouncement = async (req, res) => {
 // UPDATE
 export const updateAnnouncement = async (req, res) => {
   try {
+    console.log("UPDATE ANNOUNCEMENT BODY:", req.body);
+    console.log("UPDATE ANNOUNCEMENT FILE:", req.file);
+
     const item = await Announcement.findByPk(req.params.id);
 
     if (!item) {
@@ -63,11 +85,11 @@ export const updateAnnouncement = async (req, res) => {
       : item.image;
 
     await item.update({
-      title: req.body.title ?? item.title,
-      message: req.body.message ?? item.message,
+      title: req.body.title !== undefined ? req.body.title : item.title,
+      message: req.body.message !== undefined ? req.body.message : item.message,
       image,
       active:
-        req.body.active === undefined
+        req.body.active === undefined || req.body.active === null
           ? item.active
           : req.body.active === true ||
             req.body.active === "true" ||
@@ -75,7 +97,10 @@ export const updateAnnouncement = async (req, res) => {
             req.body.active === "1",
     });
 
-    return res.json(item);
+    return res.status(200).json({
+      message: "Announcement updated successfully",
+      data: item,
+    });
   } catch (error) {
     console.error("Update Announcement Error:", error);
     return res.status(500).json({
@@ -97,7 +122,7 @@ export const deleteAnnouncement = async (req, res) => {
 
     await item.destroy();
 
-    return res.json({
+    return res.status(200).json({
       message: "Announcement deleted successfully",
     });
   } catch (error) {
