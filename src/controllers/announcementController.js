@@ -13,6 +13,7 @@ export const listAnnouncements = async (req, res) => {
     console.error("List Announcement Error:", error);
     return res.status(500).json({
       message: error.message,
+      sqlMessage: error?.parent?.sqlMessage,
     });
   }
 };
@@ -40,6 +41,12 @@ export const createAnnouncement = async (req, res) => {
       ? `/uploads/announcements/${req.file.filename}`
       : null;
 
+    const createdBy =
+      req.user?.id ||
+      req.user?.userId ||
+      req.user?.uid ||
+      null;
+
     const item = await Announcement.create({
       title,
       message,
@@ -51,7 +58,7 @@ export const createAnnouncement = async (req, res) => {
             activeValue === "true" ||
             activeValue === 1 ||
             activeValue === "1",
-      createdBy: req.user?.id || null,
+      createdBy,
     });
 
     return res.status(201).json({
@@ -60,8 +67,12 @@ export const createAnnouncement = async (req, res) => {
     });
   } catch (error) {
     console.error("Create Announcement Error:", error);
+    console.error("SQL Message:", error?.parent?.sqlMessage);
+    console.error("SQL:", error?.parent?.sql);
+
     return res.status(500).json({
       message: error.message,
+      sqlMessage: error?.parent?.sqlMessage,
     });
   }
 };
@@ -103,8 +114,11 @@ export const updateAnnouncement = async (req, res) => {
     });
   } catch (error) {
     console.error("Update Announcement Error:", error);
+    console.error("SQL Message:", error?.parent?.sqlMessage);
+
     return res.status(500).json({
       message: error.message,
+      sqlMessage: error?.parent?.sqlMessage,
     });
   }
 };
@@ -129,6 +143,7 @@ export const deleteAnnouncement = async (req, res) => {
     console.error("Delete Announcement Error:", error);
     return res.status(500).json({
       message: error.message,
+      sqlMessage: error?.parent?.sqlMessage,
     });
   }
 };
