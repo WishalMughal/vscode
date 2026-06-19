@@ -8,6 +8,7 @@ import Zikar from "./Zikar.js";
 import Contact from "./Contact.js";
 import MasjidTiming from "./MasjidTiming.js";
 import PrivacyPolicy from "./PrivacyPolicy.js";
+import Banner from "./Banner.js";
 
 // Associations
 User.hasMany(Student, { foreignKey: "createdBy" });
@@ -29,10 +30,13 @@ Book.belongsTo(User, { foreignKey: "createdBy" });
 User.hasMany(Zikar, { foreignKey: "createdBy" });
 Zikar.belongsTo(User, { foreignKey: "createdBy" });
 
+User.hasMany(Banner, { foreignKey: "createdBy" });
+Banner.belongsTo(User, { foreignKey: "createdBy" });
+
 export const syncDB = async () => {
   await sequelize.sync();
   console.log("🗃️ All models synced");
 };
 
-export { User, Student, Bayan, Announcement, Book, Zikar, Contact };
+export { User, Student, Bayan, Announcement, Book, Zikar, Contact, Banner };
 export { MasjidTiming, PrivacyPolicy };

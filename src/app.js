@@ -13,6 +13,7 @@ import contactRoutes from "./routes/contactRoutes.js";
 import weatherRoutes from "./routes/weatherRoutes.js";
 import youtubeRoutes from "./routes/youtubeRoutes.js";
 import adminContentRoutes from "./routes/adminContentRoutes.js";
+import bannerRoutes from "./routes/bannerRoutes.js";
 
 import { PrivacyPolicy } from "./models/index.js"; // ✅ ADD THIS
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -97,6 +98,7 @@ app.use("/api/quran", quranRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/weather", weatherRoutes);
 app.use("/api/youtube", youtubeRoutes);
+app.use("/api/banners", bannerRoutes);
 
 app.use("/api/admin-content", adminContentRoutes);
 
