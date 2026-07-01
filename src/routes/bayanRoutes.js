@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { auth } from "../middleware/auth.js";
+
 import {
   listBayans,
   createBayan,
@@ -8,10 +9,27 @@ import {
 
 const router = Router();
 
+// ==================== PUBLIC ROUTES ====================
+
+// All bayans
+// Examples:
+// /api/bayans
+// /api/bayans?weekly=true
+// /api/bayans?today=true
+// /api/bayans?playlist=true
+// /api/bayans?isLive=true
 router.get("/", listBayans);
 
+// Current live bayan
 router.get("/live", getLiveBayan);
 
-router.post("/", auth(["admin"]), createBayan);
+// ==================== ADMIN ROUTES ====================
+
+// Create bayan
+router.post(
+  "/",
+  auth(["admin"]),
+  createBayan
+);
 
 export default router;

@@ -29,9 +29,11 @@ Announcement.init(
       },
     },
 
+    // Image is optional
     image: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(500),
       allowNull: true,
+      defaultValue: null,
     },
 
     active: {
@@ -51,8 +53,7 @@ Announcement.init(
     modelName: "Announcement",
     tableName: "announcements",
     timestamps: true,
-
-   
+    underscored: false,
   }
 );
 

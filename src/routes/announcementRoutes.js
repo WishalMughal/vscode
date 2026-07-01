@@ -60,10 +60,10 @@ const uploadImage = (req, res, next) => {
   });
 };
 
-// Public list
+// List announcements
 router.get("/", listAnnouncements);
 
-// Test route to confirm latest route file is deployed
+// Test route
 router.get("/delete-test/:id", (req, res) => {
   return res.status(200).json({
     ok: true,
@@ -72,7 +72,8 @@ router.get("/delete-test/:id", (req, res) => {
   });
 });
 
-// Create
+// Create announcement
+// Image is optional. If no image is sent, req.file will be undefined.
 router.post(
   "/",
   auth(["admin"]),
@@ -80,7 +81,7 @@ router.post(
   createAnnouncement
 );
 
-// Update
+// Update announcement
 router.put(
   "/:id",
   auth(["admin"]),
@@ -88,14 +89,7 @@ router.put(
   updateAnnouncement
 );
 
-// Delete alias for easier browser/API testing
-router.delete(
-  "/delete/:id",
-  auth(["admin"]),
-  deleteAnnouncement
-);
-
-// Delete normal route used by Flutter
+// Delete announcement
 router.delete(
   "/:id",
   auth(["admin"]),

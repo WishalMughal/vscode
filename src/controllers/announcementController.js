@@ -21,10 +21,6 @@ export const listAnnouncements = async (req, res) => {
 // CREATE
 export const createAnnouncement = async (req, res) => {
   try {
-    console.log("ANNOUNCEMENT BODY:", req.body);
-    console.log("ANNOUNCEMENT FILE:", req.file);
-    console.log("ANNOUNCEMENT USER:", req.user);
-
     const title = (req.body.title || "").toString().trim();
     const message = (req.body.message || "").toString().trim();
     const activeValue = req.body.active;
@@ -37,15 +33,12 @@ export const createAnnouncement = async (req, res) => {
       return res.status(400).json({ message: "Message is required" });
     }
 
+    // image is optional
     const image = req.file
       ? `/uploads/announcements/${req.file.filename}`
       : null;
 
-    const createdBy =
-      req.user?.id ||
-      req.user?.userId ||
-      req.user?.uid ||
-      null;
+    const createdBy = req.user?.id || req.user?.userId || req.user?.uid || null;
 
     const item = await Announcement.create({
       title,
@@ -62,14 +55,13 @@ export const createAnnouncement = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: "Announcement saved successfully",
+      message: image
+        ? "Announcement with image saved successfully"
+        : "Text announcement saved successfully",
       data: item,
     });
   } catch (error) {
     console.error("Create Announcement Error:", error);
-    console.error("SQL Message:", error?.parent?.sqlMessage);
-    console.error("SQL:", error?.parent?.sql);
-
     return res.status(500).json({
       message: error.message,
       sqlMessage: error?.parent?.sqlMessage,
@@ -80,9 +72,6 @@ export const createAnnouncement = async (req, res) => {
 // UPDATE
 export const updateAnnouncement = async (req, res) => {
   try {
-    console.log("UPDATE ANNOUNCEMENT BODY:", req.body);
-    console.log("UPDATE ANNOUNCEMENT FILE:", req.file);
-
     const item = await Announcement.findByPk(req.params.id);
 
     if (!item) {
@@ -114,8 +103,6 @@ export const updateAnnouncement = async (req, res) => {
     });
   } catch (error) {
     console.error("Update Announcement Error:", error);
-    console.error("SQL Message:", error?.parent?.sqlMessage);
-
     return res.status(500).json({
       message: error.message,
       sqlMessage: error?.parent?.sqlMessage,
@@ -126,15 +113,16 @@ export const updateAnnouncement = async (req, res) => {
 // DELETE
 export const deleteAnnouncement = async (req, res) => {
   try {
-    const item = await Announcement.findByPk(req.params.id);
+    const deletedCount = await Announcement.destroy({
+      where: { id: req.params.id },
+      force: true,
+    });
 
-    if (!item) {
+    if (deletedCount === 0) {
       return res.status(404).json({
         message: "Announcement not found",
       });
     }
-
-    await item.destroy();
 
     return res.status(200).json({
       message: "Announcement deleted successfully",
