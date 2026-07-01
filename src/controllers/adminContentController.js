@@ -1,4 +1,27 @@
+import fetch from "node-fetch";
 import { MasjidTiming, PrivacyPolicy } from "../models/index.js";
+
+const todayISO = () => new Date().toISOString().split("T")[0];
+
+const getAutoMaghribTime = async (city = "Karachi") => {
+  try {
+    const date = todayISO();
+    const selectedCity = city && city.trim() ? city.trim() : "Karachi";
+
+    const resp = await fetch(
+      `https://api.aladhan.com/v1/timingsByCity/${date}?city=${encodeURIComponent(
+        selectedCity
+      )}&country=Pakistan&method=1&school=1`
+    );
+
+    const data = await resp.json();
+
+    return data?.data?.timings?.Maghrib || "06:45";
+  } catch (error) {
+    console.error("Auto Maghrib Error:", error);
+    return "06:45";
+  }
+};
 
 export const createOrUpdateMasjidTiming = async (req, res) => {
   try {
@@ -8,17 +31,18 @@ export const createOrUpdateMasjidTiming = async (req, res) => {
       fajr,
       dhuhr,
       asr,
-      maghrib,
       isha,
       jumma,
       notes,
     } = req.body;
 
-    if (!masjidName || !fajr || !dhuhr || !asr || !maghrib || !isha) {
+    if (!masjidName || !fajr || !dhuhr || !asr || !isha) {
       return res.status(400).json({
-        msg: "masjidName, fajr, dhuhr, asr, maghrib and isha are required",
+        msg: "masjidName, fajr, dhuhr, asr and isha are required",
       });
     }
+
+    const maghrib = await getAutoMaghribTime(city);
 
     let timing = await MasjidTiming.findOne();
 
@@ -54,7 +78,10 @@ export const createOrUpdateMasjidTiming = async (req, res) => {
     });
   } catch (error) {
     console.error("createOrUpdateMasjidTiming error:", error);
-    return res.status(500).json({ msg: "Failed to save masjid timing" });
+    return res.status(500).json({
+      msg: "Failed to save masjid timing",
+      message: error.message,
+    });
   }
 };
 
