@@ -19,6 +19,7 @@ MasjidTiming.init(
     city: {
       type: DataTypes.STRING(100),
       allowNull: true,
+      defaultValue: "Karachi",
     },
 
     fajr: {
@@ -36,11 +37,11 @@ MasjidTiming.init(
       allowNull: false,
     },
 
-    // ✅ Automatically set by backend
+    // Auto set by backend
     maghrib: {
       type: DataTypes.STRING(20),
       allowNull: true,
-      defaultValue: "06:45 PM",
+      defaultValue: "06:45",
     },
 
     isha: {
