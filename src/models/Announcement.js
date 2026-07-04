@@ -12,24 +12,19 @@ Announcement.init(
       allowNull: false,
     },
 
+    // Optional
     title: {
       type: DataTypes.STRING(200),
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-        len: [1, 200],
-      },
+      allowNull: true,
     },
 
+    // Optional
     message: {
       type: DataTypes.TEXT,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
+      allowNull: true,
     },
 
-    // Image is optional
+    // Optional
     image: {
       type: DataTypes.STRING(500),
       allowNull: true,

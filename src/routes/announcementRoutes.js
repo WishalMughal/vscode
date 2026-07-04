@@ -60,20 +60,12 @@ const uploadImage = (req, res, next) => {
   });
 };
 
-// List announcements
+// Public
 router.get("/", listAnnouncements);
 
-// Test route
-router.get("/delete-test/:id", (req, res) => {
-  return res.status(200).json({
-    ok: true,
-    message: "announcementRoutes latest file deployed",
-    id: req.params.id,
-  });
-});
-
-// Create announcement
-// Image is optional. If no image is sent, req.file will be undefined.
+// Admin create
+// title/message/image are all optional,
+// but controller requires at least one of them.
 router.post(
   "/",
   auth(["admin"]),
@@ -81,7 +73,7 @@ router.post(
   createAnnouncement
 );
 
-// Update announcement
+// Admin update
 router.put(
   "/:id",
   auth(["admin"]),
@@ -89,7 +81,7 @@ router.put(
   updateAnnouncement
 );
 
-// Delete announcement
+// Admin delete
 router.delete(
   "/:id",
   auth(["admin"]),
