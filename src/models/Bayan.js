@@ -21,28 +21,31 @@ Bayan.init(
       allowNull: false,
     },
 
-    // Normal weekly bayan
     weekly: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
 
-    // Today's bayan
     today: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
 
-    // Live bayan
     isLive: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
 
-    // NEW: Playlist bayan
     playlist: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+
+    // Live bayan will expire after 1 hour
+    liveExpiresAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: null,
     },
 
     createdBy: {
