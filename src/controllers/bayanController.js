@@ -12,22 +12,21 @@ const toBoolean = (value, defaultValue = false) => {
   );
 };
 
-// Disable expired live bayans
 const expireOldLiveBayans = async () => {
   await Bayan.update(
     { isLive: false },
     {
       where: {
         isLive: true,
-        liveExpiresAt: {
-          [Op.lt]: new Date(),
-        },
+        [Op.or]: [
+          { liveExpiresAt: null },
+          { liveExpiresAt: { [Op.lt]: new Date() } },
+        ],
       },
     }
   );
 };
 
-// LIST
 export const listBayans = async (req, res) => {
   try {
     await expireOldLiveBayans();
@@ -48,6 +47,7 @@ export const listBayans = async (req, res) => {
 
     if (req.query.isLive === "1" || req.query.isLive === "true") {
       where.isLive = true;
+      where.liveExpiresAt = { [Op.gt]: new Date() };
     }
 
     const data = await Bayan.findAll({
@@ -64,26 +64,15 @@ export const listBayans = async (req, res) => {
   }
 };
 
-// CREATE
 export const createBayan = async (req, res) => {
   try {
     const title = (req.body.title || "").toString().trim();
     const youtubeUrl = (req.body.youtubeUrl || "").toString().trim();
 
-    if (!title) {
-      return res.status(400).json({ message: "Title is required" });
-    }
-
-    if (!youtubeUrl) {
-      return res.status(400).json({ message: "YouTube URL is required" });
-    }
+    if (!title) return res.status(400).json({ message: "Title is required" });
+    if (!youtubeUrl) return res.status(400).json({ message: "YouTube URL is required" });
 
     const isLive = toBoolean(req.body.isLive);
-    const playlist = toBoolean(req.body.playlist);
-
-    const liveExpiresAt = isLive
-      ? new Date(Date.now() + 60 * 60 * 1000)
-      : null;
 
     const item = await Bayan.create({
       title,
@@ -91,8 +80,8 @@ export const createBayan = async (req, res) => {
       weekly: toBoolean(req.body.weekly),
       today: toBoolean(req.body.today),
       isLive,
-      playlist,
-      liveExpiresAt,
+      playlist: toBoolean(req.body.playlist),
+      liveExpiresAt: isLive ? new Date(Date.now() + 60 * 60 * 1000) : null,
       createdBy: req.user?.id || req.user?.userId || null,
     });
 
@@ -110,13 +99,15 @@ export const createBayan = async (req, res) => {
   }
 };
 
-// LIVE
 export const getLiveBayan = async (req, res) => {
   try {
     await expireOldLiveBayans();
 
     const liveBayan = await Bayan.findOne({
-      where: { isLive: true },
+      where: {
+        isLive: true,
+        liveExpiresAt: { [Op.gt]: new Date() },
+      },
       order: [["createdAt", "DESC"]],
     });
 
@@ -133,7 +124,6 @@ export const getLiveBayan = async (req, res) => {
   }
 };
 
-// DELETE
 export const deleteBayan = async (req, res) => {
   try {
     const deleted = await Bayan.destroy({
@@ -141,9 +131,7 @@ export const deleteBayan = async (req, res) => {
     });
 
     if (!deleted) {
-      return res.status(404).json({
-        message: "Bayan not found",
-      });
+      return res.status(404).json({ message: "Bayan not found" });
     }
 
     return res.status(200).json({

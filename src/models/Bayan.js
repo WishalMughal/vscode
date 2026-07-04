@@ -41,7 +41,6 @@ Bayan.init(
       defaultValue: false,
     },
 
-    // Live bayan will expire after 1 hour
     liveExpiresAt: {
       type: DataTypes.DATE,
       allowNull: true,
