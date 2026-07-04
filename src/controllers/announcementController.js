@@ -11,6 +11,7 @@ export const listAnnouncements = async (req, res) => {
     return res.status(200).json(data);
   } catch (error) {
     console.error("List Announcement Error:", error);
+
     return res.status(500).json({
       message: error.message,
       sqlMessage: error?.parent?.sqlMessage,
@@ -25,24 +26,27 @@ export const createAnnouncement = async (req, res) => {
     const message = (req.body.message || "").toString().trim();
     const activeValue = req.body.active;
 
-    if (!title) {
-      return res.status(400).json({ message: "Title is required" });
-    }
-
-    if (!message) {
-      return res.status(400).json({ message: "Message is required" });
-    }
-
-    // image is optional
+    // Image is optional
     const image = req.file
       ? `/uploads/announcements/${req.file.filename}`
       : null;
 
-    const createdBy = req.user?.id || req.user?.userId || req.user?.uid || null;
+    // At least one field must exist
+    if (!title && !message && !image) {
+      return res.status(400).json({
+        message: "Please add title, message, or image",
+      });
+    }
+
+    const createdBy =
+      req.user?.id ||
+      req.user?.userId ||
+      req.user?.uid ||
+      null;
 
     const item = await Announcement.create({
-      title,
-      message,
+      title: title || null,
+      message: message || null,
       image,
       active:
         activeValue === undefined || activeValue === null
@@ -55,13 +59,12 @@ export const createAnnouncement = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: image
-        ? "Announcement with image saved successfully"
-        : "Text announcement saved successfully",
+      message: "Announcement saved successfully",
       data: item,
     });
   } catch (error) {
     console.error("Create Announcement Error:", error);
+
     return res.status(500).json({
       message: error.message,
       sqlMessage: error?.parent?.sqlMessage,
@@ -80,16 +83,34 @@ export const updateAnnouncement = async (req, res) => {
       });
     }
 
+    const title =
+      req.body.title !== undefined
+        ? req.body.title.toString().trim()
+        : item.title;
+
+    const message =
+      req.body.message !== undefined
+        ? req.body.message.toString().trim()
+        : item.message;
+
     const image = req.file
       ? `/uploads/announcements/${req.file.filename}`
       : item.image;
 
+    // Prevent completely empty announcement
+    if (!title && !message && !image) {
+      return res.status(400).json({
+        message: "Announcement must contain title, message, or image",
+      });
+    }
+
     await item.update({
-      title: req.body.title !== undefined ? req.body.title : item.title,
-      message: req.body.message !== undefined ? req.body.message : item.message,
+      title: title || null,
+      message: message || null,
       image,
       active:
-        req.body.active === undefined || req.body.active === null
+        req.body.active === undefined ||
+        req.body.active === null
           ? item.active
           : req.body.active === true ||
             req.body.active === "true" ||
@@ -103,6 +124,7 @@ export const updateAnnouncement = async (req, res) => {
     });
   } catch (error) {
     console.error("Update Announcement Error:", error);
+
     return res.status(500).json({
       message: error.message,
       sqlMessage: error?.parent?.sqlMessage,
@@ -129,6 +151,7 @@ export const deleteAnnouncement = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete Announcement Error:", error);
+
     return res.status(500).json({
       message: error.message,
       sqlMessage: error?.parent?.sqlMessage,

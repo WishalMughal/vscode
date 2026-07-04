@@ -5,6 +5,7 @@ import {
   listBayans,
   createBayan,
   getLiveBayan,
+  deleteBayan,
 } from "../controllers/bayanController.js";
 
 const router = Router();
@@ -30,6 +31,13 @@ router.post(
   "/",
   auth(["admin"]),
   createBayan
+);
+
+// Delete bayan (normal, weekly, today, playlist, live)
+router.delete(
+  "/:id",
+  auth(["admin"]),
+  deleteBayan
 );
 
 export default router;
