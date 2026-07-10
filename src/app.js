@@ -15,94 +15,164 @@ import youtubeRoutes from "./routes/youtubeRoutes.js";
 import adminContentRoutes from "./routes/adminContentRoutes.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
 
-import { PrivacyPolicy } from "./models/index.js"; // ✅ ADD THIS
+import { PrivacyPolicy } from "./models/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
+// ======================================================
+// Middleware
+// ======================================================
+
 app.use(cors());
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.use("/uploads", express.static("uploads"));
-
-app.get("/", (req, res) =>
-  res.json({ ok: true, service: "Islamic Academy API (Phase A)" })
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
 );
 
-// ===================== ✅ PUBLIC PRIVACY POLICY PAGE =====================
+// Uploaded files
+app.use("/uploads", express.static("uploads"));
+
+// ======================================================
+// Root
+// ======================================================
+
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    service: "Islamic Academy API",
+    version: "1.0.0",
+  });
+});
+
+// ======================================================
+// Public Privacy Policy
+// ======================================================
+
 app.get("/privacy-policy", async (req, res) => {
   try {
     const policy = await PrivacyPolicy.findOne({
       order: [["updatedAt", "DESC"]],
     });
 
-    const title = policy?.title || "Privacy Policy";
+    const title =
+      policy?.title || "Privacy Policy";
+
     const content =
       policy?.content ||
-      "Privacy policy content will be updated soon.";
+      "Privacy Policy will be updated soon.";
 
     res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${title}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            background: #f6f8fb;
-            color: #222;
-            line-height: 1.7;
-            padding: 24px;
-            max-width: 900px;
-            margin: auto;
-          }
-          .card {
-            background: white;
-            padding: 28px;
-            border-radius: 18px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-          }
-          h1 { color: #0D8B6F; }
-          pre {
-            white-space: pre-wrap;
-            font-family: inherit;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <h1>${title}</h1>
-          <pre>${content}</pre>
-        </div>
-      </body>
-      </html>
-    `);
-  } catch (e) {
-    res.status(500).send("Failed to load privacy policy");
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>${title}</title>
+
+<style>
+
+body{
+background:#f5f7fb;
+font-family:Arial,sans-serif;
+padding:30px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+background:#fff;
+padding:30px;
+border-radius:20px;
+box-shadow:0 5px 20px rgba(0,0,0,.08);
+}
+
+h1{
+color:#0D8B6F;
+margin-bottom:20px;
+}
+
+pre{
+white-space:pre-wrap;
+font-family:inherit;
+line-height:1.7;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>${title}</h1>
+
+<pre>${content}</pre>
+
+</div>
+
+</body>
+
+</html>
+`);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).send("Unable to load privacy policy.");
   }
 });
-// ========================================================================
 
-// ✅ All API routes
+// ======================================================
+// API Routes
+// ======================================================
+
 app.use("/api/auth", authRoutes);
+
 app.use("/api/bayans", bayanRoutes);
+
 app.use("/api/announcements", announcementRoutes);
+
 app.use("/api/students", studentRoutes);
+
 app.use("/api/books", bookRoutes);
+
 app.use("/api/zikar", zikarRoutes);
+
 app.use("/api/namaz", namazRoutes);
+
 app.use("/api/quran", quranRoutes);
+
 app.use("/api/contact", contactRoutes);
+
 app.use("/api/weather", weatherRoutes);
+
 app.use("/api/youtube", youtubeRoutes);
+
 app.use("/api/banners", bannerRoutes);
 
 app.use("/api/admin-content", adminContentRoutes);
 
-// ❗ Always last
+// ======================================================
+// 404 Handler
+// ======================================================
+
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "API endpoint not found.",
+  });
+});
+
+// ======================================================
+// Error Handler
+// ======================================================
+
 app.use(errorHandler);
 
 export default app;
