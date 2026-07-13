@@ -14,19 +14,19 @@ StudentSemesterResult.init(
     studentId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      field: "studentId",
+      field: "student_id",
     },
 
     semesterNo: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      field: "semesterNo",
+      field: "semester_no",
     },
 
     semesterTitle: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING(200),
       allowNull: true,
-      field: "semesterTitle",
+      field: "semester_title",
     },
 
     semesterStatus: {
@@ -39,21 +39,20 @@ StudentSemesterResult.init(
         "on_hold",
         "cancelled"
       ),
-      allowNull: false,
       defaultValue: "pending",
-      field: "semesterStatus",
+      field: "semester_status",
     },
 
     totalMarks: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
-      field: "totalMarks",
+      field: "total_marks",
     },
 
     obtainedMarks: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true,
-      field: "obtainedMarks",
+      field: "obtained_marks",
     },
 
     percentage: {
@@ -62,14 +61,8 @@ StudentSemesterResult.init(
     },
 
     grade: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(30),
       allowNull: true,
-    },
-
-    resultFileUrl: {
-      type: DataTypes.STRING(500),
-      allowNull: true,
-      field: "resultFileUrl",
     },
 
     remarks: {
@@ -77,28 +70,21 @@ StudentSemesterResult.init(
       allowNull: true,
     },
 
-    published: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
+    resultFileUrl: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      field: "result_file_url",
     },
 
-    publishedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      field: "publishedAt",
+    published: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
 
     createdBy: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      field: "createdBy",
-    },
-
-    updatedBy: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: "updatedBy",
+      field: "created_by",
     },
   },
   {
@@ -106,11 +92,12 @@ StudentSemesterResult.init(
     modelName: "StudentSemesterResult",
     tableName: "student_semester_results",
     timestamps: true,
+
     indexes: [
       {
         unique: true,
-        fields: ["studentId", "semesterNo"],
         name: "unique_student_semester_result",
+        fields: ["studentId", "semesterNo"],
       },
     ],
   }
