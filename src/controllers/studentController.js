@@ -19,15 +19,16 @@ const COURSES = [
   "Other",
 ];
 
+// Must match students.status ENUM in MySQL.
 const ADMISSION_STATUSES = [
   "pending",
-  "approved",
   "active",
-  "rejected",
-  "inactive",
   "blocked",
+  "rejected",
+  "graduated",
 ];
 
+// Must match students.semester_status ENUM.
 const SEMESTER_STATUSES = [
   "pending",
   "active",
@@ -36,26 +37,128 @@ const SEMESTER_STATUSES = [
   "failed",
 ];
 
+const EDITABLE_FIELDS = [
+  "name",
+  "father_name",
+  "dob",
+  "age",
+  "gender",
+  "marital_status",
+
+  "student_cnic",
+  "cnic",
+  "guardian_cnic",
+
+  "phone",
+  "whatsapp",
+  "emergency_contact_name",
+  "emergency_contact_phone",
+  "address",
+  "city",
+  "district",
+  "province",
+
+  "dini_education",
+  "asri_education",
+  "prev_dini_institute",
+  "prev_school",
+  "previous_class",
+
+  "course_applied_for",
+  "other_course",
+  "activities",
+  "medical_condition",
+
+  "guardian_name",
+  "guardian_profession",
+  "guardian_phone",
+  "relation",
+
+  "guarantor_name",
+  "guarantor_profession",
+  "guarantor_phone",
+
+  "passport_photo_url",
+  "profile_image_url",
+  "student_document_url",
+  "father_cnic_document_url",
+  "educational_document_url",
+  "document_notes",
+
+  "admission_date",
+  "renewal_date",
+  "semester_no",
+  "semester_status",
+  "semester_result",
+  "semester_result_pdf",
+  "status",
+  "remarks",
+];
+
+const getAuthenticatedUserId = (req) => {
+  const value = req.user?.id ?? req.user?.userId;
+  const id = Number(value);
+
+  return Number.isInteger(id) && id > 0 ? id : null;
+};
+
 const toInteger = (value, fallback = null) => {
-  if (value === undefined || value === null || value === "") {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
     return fallback;
   }
 
   const number = Number(value);
-  return Number.isInteger(number) ? number : fallback;
+
+  return Number.isInteger(number)
+    ? number
+    : fallback;
 };
 
 const cleanText = (value) => {
-  if (value === undefined || value === null) return undefined;
+  if (value === undefined || value === null) {
+    return undefined;
+  }
 
   const text = value.toString().trim();
+
   return text === "" ? null : text;
 };
 
-const normalizeAdmissionPayload = (payload = {}) => {
-  const normalized = { ...payload };
+const normalizeGender = (value) => {
+  const gender = cleanText(value)?.toLowerCase();
 
-  // Support old and new frontend field names
+  if (!gender) return undefined;
+
+  if (
+    ["male", "female", "other"].includes(gender)
+  ) {
+    return gender;
+  }
+
+  return undefined;
+};
+
+const normalizeMaritalStatus = (value) => {
+  const status = cleanText(value)?.toLowerCase();
+
+  if (!status) return undefined;
+
+  if (["single", "married"].includes(status)) {
+    return status;
+  }
+
+  return undefined;
+};
+
+const normalizeAdmissionPayload = (
+  payload = {}
+) => {
+  const normalized = {};
+
   normalized.name = cleanText(
     payload.name ??
       payload.student_name ??
@@ -65,9 +168,7 @@ const normalizeAdmissionPayload = (payload = {}) => {
 
   normalized.father_name = cleanText(
     payload.father_name ??
-      payload.fatherName ??
-      payload.guardian_name ??
-      payload.guardianName
+      payload.fatherName
   );
 
   normalized.dob = cleanText(
@@ -76,14 +177,27 @@ const normalizeAdmissionPayload = (payload = {}) => {
       payload.dateOfBirth
   );
 
+  normalized.age = toInteger(payload.age);
+
+  normalized.gender = normalizeGender(
+    payload.gender
+  );
+
+  normalized.marital_status =
+    normalizeMaritalStatus(
+      payload.marital_status ??
+        payload.maritalStatus
+    );
+
   normalized.student_cnic = cleanText(
     payload.student_cnic ??
       payload.student_b_form_or_cnic ??
       payload.studentBFormOrCnic ??
       payload.b_form ??
-      payload.bForm ??
-      payload.cnic
+      payload.bForm
   );
+
+  normalized.cnic = cleanText(payload.cnic);
 
   normalized.guardian_cnic = cleanText(
     payload.guardian_cnic ??
@@ -103,21 +217,48 @@ const normalizeAdmissionPayload = (payload = {}) => {
       payload.whatsappNumber
   );
 
-  normalized.address = cleanText(payload.address);
+  normalized.emergency_contact_name =
+    cleanText(
+      payload.emergency_contact_name ??
+        payload.emergencyContactName
+    );
+
+  normalized.emergency_contact_phone =
+    cleanText(
+      payload.emergency_contact_phone ??
+        payload.emergencyContactPhone
+    );
+
+  normalized.address = cleanText(
+    payload.address
+  );
+
   normalized.city = cleanText(payload.city);
-  normalized.district = cleanText(payload.district);
-  normalized.province = cleanText(payload.province);
+
+  normalized.district = cleanText(
+    payload.district
+  );
+
+  normalized.province = cleanText(
+    payload.province
+  );
 
   normalized.dini_education = cleanText(
     payload.dini_education ??
       payload.diniEducation
   );
 
-  normalized.prev_dini_institute = cleanText(
-    payload.prev_dini_institute ??
-      payload.previous_dini_institute ??
-      payload.previousDiniInstitute
+  normalized.asri_education = cleanText(
+    payload.asri_education ??
+      payload.asriEducation
   );
+
+  normalized.prev_dini_institute =
+    cleanText(
+      payload.prev_dini_institute ??
+        payload.previous_dini_institute ??
+        payload.previousDiniInstitute
+    );
 
   normalized.prev_school = cleanText(
     payload.prev_school ??
@@ -131,10 +272,27 @@ const normalizeAdmissionPayload = (payload = {}) => {
       payload.previousClass
   );
 
+  normalized.course_applied_for =
+    cleanText(
+      payload.course_applied_for ??
+        payload.courseAppliedFor ??
+        payload.course
+    );
+
+  normalized.other_course = cleanText(
+    payload.other_course ??
+      payload.otherCourse
+  );
+
   normalized.activities = cleanText(
     payload.activities ??
       payload.other_activities ??
       payload.otherActivities
+  );
+
+  normalized.medical_condition = cleanText(
+    payload.medical_condition ??
+      payload.medicalCondition
   );
 
   normalized.guardian_name = cleanText(
@@ -142,10 +300,11 @@ const normalizeAdmissionPayload = (payload = {}) => {
       payload.guardianName
   );
 
-  normalized.guardian_profession = cleanText(
-    payload.guardian_profession ??
-      payload.guardianProfession
-  );
+  normalized.guardian_profession =
+    cleanText(
+      payload.guardian_profession ??
+        payload.guardianProfession
+    );
 
   normalized.guardian_phone = cleanText(
     payload.guardian_phone ??
@@ -163,47 +322,92 @@ const normalizeAdmissionPayload = (payload = {}) => {
       payload.guarantorName
   );
 
-  normalized.guarantor_profession = cleanText(
-    payload.guarantor_profession ??
-      payload.guarantorProfession
-  );
+  normalized.guarantor_profession =
+    cleanText(
+      payload.guarantor_profession ??
+        payload.guarantorProfession
+    );
 
   normalized.guarantor_phone = cleanText(
     payload.guarantor_phone ??
       payload.guarantorPhone
   );
 
-  normalized.course_applied_for = cleanText(
-    payload.course_applied_for ??
-      payload.courseAppliedFor ??
-      payload.course
+  normalized.passport_photo_url =
+    cleanText(
+      payload.passport_photo_url ??
+        payload.passportPhotoUrl
+    );
+
+  normalized.profile_image_url =
+    cleanText(
+      payload.profile_image_url ??
+        payload.profileImageUrl ??
+        payload.profile_image
+    );
+
+  normalized.student_document_url =
+    cleanText(
+      payload.student_document_url ??
+        payload.studentDocumentUrl ??
+        payload.student_document
+    );
+
+  normalized.father_cnic_document_url =
+    cleanText(
+      payload.father_cnic_document_url ??
+        payload.fatherCnicDocumentUrl ??
+        payload.father_cnic_document
+    );
+
+  normalized.educational_document_url =
+    cleanText(
+      payload.educational_document_url ??
+        payload.educationalDocumentUrl ??
+        payload.educational_document
+    );
+
+  normalized.document_notes = cleanText(
+    payload.document_notes ??
+      payload.documentNotes
   );
 
-  normalized.other_course = cleanText(
-    payload.other_course ??
-      payload.otherCourse
+  normalized.admission_date = cleanText(
+    payload.admission_date ??
+      payload.admissionDate
   );
 
-  normalized.age = toInteger(payload.age);
+  normalized.renewal_date = cleanText(
+    payload.renewal_date ??
+      payload.renewalDate
+  );
+
   normalized.semester_no = toInteger(
-    payload.semester_no ?? payload.semesterNo,
+    payload.semester_no ??
+      payload.semesterNo,
     1
   );
 
-  normalized.current_semester = toInteger(
-    payload.current_semester ?? payload.currentSemester,
-    normalized.semester_no || 1
+  normalized.semester_status = cleanText(
+    payload.semester_status ??
+      payload.semesterStatus
+  )?.toLowerCase();
+
+  normalized.semester_result = cleanText(
+    payload.semester_result ??
+      payload.semesterResult
   );
+
+  normalized.semester_result_pdf =
+    cleanText(
+      payload.semester_result_pdf ??
+        payload.semesterResultPdf
+    );
 
   normalized.status = cleanText(
     payload.status ??
       payload.admission_status ??
       payload.admissionStatus
-  )?.toLowerCase();
-
-  normalized.semester_status = cleanText(
-    payload.semester_status ??
-      payload.semesterStatus
   )?.toLowerCase();
 
   normalized.remarks = cleanText(
@@ -212,27 +416,26 @@ const normalizeAdmissionPayload = (payload = {}) => {
       payload.adminRemarks
   );
 
-  normalized.profile_image_url = cleanText(
-    payload.profile_image_url ??
-      payload.profileImageUrl
+  return Object.fromEntries(
+    Object.entries(normalized).filter(
+      ([, value]) => value !== undefined
+    )
   );
+};
 
-  normalized.student_document_url = cleanText(
-    payload.student_document_url ??
-      payload.studentDocumentUrl
-  );
+const pickAllowedFields = (
+  payload,
+  allowedFields = EDITABLE_FIELDS
+) => {
+  const data = {};
 
-  normalized.father_cnic_document_url = cleanText(
-    payload.father_cnic_document_url ??
-      payload.fatherCnicDocumentUrl
-  );
+  for (const field of allowedFields) {
+    if (payload[field] !== undefined) {
+      data[field] = payload[field];
+    }
+  }
 
-  normalized.educational_document_url = cleanText(
-    payload.educational_document_url ??
-      payload.educationalDocumentUrl
-  );
-
-  return normalized;
+  return data;
 };
 
 const getUploadedFilePath = (file) => {
@@ -241,10 +444,14 @@ const getUploadedFilePath = (file) => {
   return `/uploads/students/${file.filename}`;
 };
 
-const applyUploadedFiles = (payload, req) => {
+const applyUploadedFiles = (
+  payload,
+  req
+) => {
   const files = req.files || {};
 
   const profileImage =
+    req.file ||
     files.profileImage?.[0] ||
     files.profile_image?.[0];
 
@@ -265,29 +472,77 @@ const applyUploadedFiles = (payload, req) => {
     files.educational_document?.[0];
 
   if (profileImage) {
-    payload.profile_image_url = getUploadedFilePath(profileImage);
+    payload.profile_image_url =
+      getUploadedFilePath(profileImage);
   }
 
   if (studentDocument) {
-    payload.student_document_url = getUploadedFilePath(studentDocument);
+    payload.student_document_url =
+      getUploadedFilePath(studentDocument);
   }
 
   if (fatherCnic) {
-    payload.father_cnic_document_url = getUploadedFilePath(fatherCnic);
+    payload.father_cnic_document_url =
+      getUploadedFilePath(fatherCnic);
   }
 
   if (educationalDocument) {
     payload.educational_document_url =
-      getUploadedFilePath(educationalDocument);
+      getUploadedFilePath(
+        educationalDocument
+      );
   }
 
   return payload;
 };
 
-// =========================
+const validateCourse = (
+  payload,
+  res
+) => {
+  if (!payload.course_applied_for) {
+    return fail(
+      res,
+      "Please select a course",
+      400
+    );
+  }
+
+  if (
+    !COURSES.includes(
+      payload.course_applied_for
+    )
+  ) {
+    return fail(
+      res,
+      "Invalid course selected",
+      400
+    );
+  }
+
+  if (
+    payload.course_applied_for ===
+      "Other" &&
+    !payload.other_course
+  ) {
+    return fail(
+      res,
+      "Please enter the other course name",
+      400
+    );
+  }
+
+  return null;
+};
+
+// ======================================================
 // ADMIN: LIST ALL STUDENTS
-// =========================
-export const listStudents = async (req, res) => {
+// ======================================================
+
+export const listStudents = async (
+  req,
+  res
+) => {
   try {
     const data = await Student.findAll({
       order: [["createdAt", "DESC"]],
@@ -295,70 +550,155 @@ export const listStudents = async (req, res) => {
 
     return ok(res, data);
   } catch (error) {
-    console.error("listStudents error:", error);
+    console.error(
+      "listStudents error:",
+      error
+    );
 
-    return fail(res, "Failed to load students");
+    return fail(
+      res,
+      error?.parent?.sqlMessage ||
+        "Failed to load students",
+      500
+    );
   }
 };
 
-// =========================
-// STUDENT: VIEW OWN RECORD
-// =========================
-export const getMyStudentRecord = async (req, res) => {
+// ======================================================
+// STUDENT/ADMIN: VIEW OWN RECORD
+// ======================================================
+
+export const getMyStudentRecord = async (
+  req,
+  res
+) => {
   try {
+    const userId =
+      getAuthenticatedUserId(req);
+
+    if (!userId) {
+      return fail(
+        res,
+        "User ID missing from authentication token",
+        401
+      );
+    }
+
     const item = await Student.findOne({
       where: {
-        userId: req.user.id,
+        userId,
       },
     });
 
     if (!item) {
-      return fail(res, "Student record not found", 404);
+      return fail(
+        res,
+        "Student record not found",
+        404
+      );
     }
 
     return ok(res, item);
   } catch (error) {
-    console.error("getMyStudentRecord error:", error);
+    console.error(
+      "getMyStudentRecord error:",
+      error
+    );
 
-    return fail(res, "Failed to load student record");
+    return fail(
+      res,
+      error?.parent?.sqlMessage ||
+        "Failed to load student record",
+      500
+    );
   }
 };
 
-// =========================
+// ======================================================
 // ADMIN: VIEW ONE STUDENT
-// =========================
-export const getStudentById = async (req, res) => {
+// ======================================================
+
+export const getStudentById = async (
+  req,
+  res
+) => {
   try {
     const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return fail(res, "Invalid student ID", 400);
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+      return fail(
+        res,
+        "Invalid student ID",
+        400
+      );
     }
 
-    const item = await Student.findByPk(id);
+    const item =
+      await Student.findByPk(id);
 
     if (!item) {
-      return fail(res, "Student not found", 404);
+      return fail(
+        res,
+        "Student not found",
+        404
+      );
     }
 
     return ok(res, item);
   } catch (error) {
-    console.error("getStudentById error:", error);
+    console.error(
+      "getStudentById error:",
+      error
+    );
 
-    return fail(res, "Failed to load student");
+    return fail(
+      res,
+      error?.parent?.sqlMessage ||
+        "Failed to load student",
+      500
+    );
   }
 };
 
-// =========================
-// STUDENT: SUBMIT ADMISSION
-// =========================
-export const createAdmission = async (req, res) => {
+// ======================================================
+// STUDENT/ADMIN: CREATE ADMISSION
+// ======================================================
+
+export const createAdmission = async (
+  req,
+  res
+) => {
   try {
-    let payload = normalizeAdmissionPayload(req.body || {});
-    payload = applyUploadedFiles(payload, req);
+    const authenticatedUserId =
+      getAuthenticatedUserId(req);
+
+    if (!authenticatedUserId) {
+      return fail(
+        res,
+        "User ID missing from authentication token",
+        401
+      );
+    }
+
+    let payload =
+      normalizeAdmissionPayload(
+        req.body || {}
+      );
+
+    payload = applyUploadedFiles(
+      payload,
+      req
+    );
 
     if (!payload.name) {
-      return fail(res, "Student name is required", 400);
+      return fail(
+        res,
+        "Student name is required",
+        400
+      );
     }
 
     if (!payload.father_name) {
@@ -369,7 +709,10 @@ export const createAdmission = async (req, res) => {
       );
     }
 
-    if (!payload.phone && !payload.whatsapp) {
+    if (
+      !payload.phone &&
+      !payload.whatsapp
+    ) {
       return fail(
         res,
         "At least one contact number is required",
@@ -377,37 +720,38 @@ export const createAdmission = async (req, res) => {
       );
     }
 
-    if (!payload.course_applied_for) {
-      return fail(res, "Please select a course", 400);
+    const courseError =
+      validateCourse(payload, res);
+
+    if (courseError) {
+      return courseError;
     }
 
-    if (!COURSES.includes(payload.course_applied_for)) {
-      return fail(res, "Invalid course selected", 400);
-    }
+    const role = String(
+      req.user?.role || ""
+    )
+      .trim()
+      .toLowerCase();
 
-    if (
-      payload.course_applied_for === "Other" &&
-      !payload.other_course
-    ) {
+    const userId =
+      role === "student"
+        ? authenticatedUserId
+        : toInteger(req.body.userId);
+
+    if (!userId) {
       return fail(
         res,
-        "Please enter the other course name",
+        "Student user ID is required",
         400
       );
     }
 
-    const userId =
-      req.user.role === "student"
-        ? req.user.id
-        : toInteger(req.body.userId);
-
-    if (!userId) {
-      return fail(res, "Student user ID is required", 400);
-    }
-
-    const existing = await Student.findOne({
-      where: { userId },
-    });
+    const existing =
+      await Student.findOne({
+        where: {
+          userId,
+        },
+      });
 
     if (existing) {
       return fail(
@@ -417,30 +761,39 @@ export const createAdmission = async (req, res) => {
       );
     }
 
-    const item = await Student.create({
-      ...payload,
+    // Only valid Student model attributes
+    // are passed to Sequelize.
+    const createData =
+      pickAllowedFields(payload);
 
-      status: "pending",
-      semester_status: "pending",
+    createData.status = "pending";
+    createData.semester_status =
+      "pending";
 
-      admission_date:
-        payload.admission_date || new Date(),
+    createData.admission_date =
+      payload.admission_date ||
+      new Date();
 
-      semester_no:
-        payload.semester_no || 1,
+    createData.semester_no =
+      payload.semester_no || 1;
 
-      current_semester:
-        payload.current_semester ||
-        payload.semester_no ||
-        1,
+    createData.userId = userId;
 
-      userId,
-      createdBy: req.user.id,
-    });
+    createData.createdBy =
+      authenticatedUserId;
+
+    const item =
+      await Student.create(
+        createData
+      );
 
     return ok(res, item);
   } catch (error) {
-    console.error("createAdmission error:", error);
+    console.error(
+      "createAdmission error:",
+      error
+    );
+
     console.error(
       "createAdmission SQL error:",
       error?.parent?.sqlMessage
@@ -449,273 +802,502 @@ export const createAdmission = async (req, res) => {
     return fail(
       res,
       error?.parent?.sqlMessage ||
-        "Failed to submit admission form"
+        "Failed to submit admission form",
+      500
     );
   }
 };
 
-// =========================
-// STUDENT: RENEWAL REQUEST
-// =========================
-export const createRenewal = async (req, res) => {
-  try {
-    const payload = normalizeAdmissionPayload(req.body || {});
+// ======================================================
+// STUDENT/ADMIN: RENEWAL REQUEST
+// ======================================================
 
-    const existing = await Student.findOne({
-      where: {
-        userId: req.user.id,
-      },
-    });
+export const createRenewal = async (
+  req,
+  res
+) => {
+  try {
+    const userId =
+      getAuthenticatedUserId(req);
+
+    if (!userId) {
+      return fail(
+        res,
+        "User ID missing from authentication token",
+        401
+      );
+    }
+
+    const payload =
+      normalizeAdmissionPayload(
+        req.body || {}
+      );
+
+    const existing =
+      await Student.findOne({
+        where: {
+          userId,
+        },
+      });
 
     if (!existing) {
-      return fail(res, "Student record not found", 404);
+      return fail(
+        res,
+        "Student record not found",
+        404
+      );
     }
 
-    existing.renewal_date = new Date();
+    existing.renewal_date =
+      new Date();
 
-    if (payload.semester_no != null) {
-      existing.semester_no = payload.semester_no;
-      existing.current_semester = payload.semester_no;
+    if (
+      payload.semester_no != null
+    ) {
+      existing.semester_no =
+        payload.semester_no;
     }
 
-    if (payload.phone !== undefined) {
-      existing.phone = payload.phone;
+    if (
+      payload.phone !== undefined
+    ) {
+      existing.phone =
+        payload.phone;
     }
 
-    if (payload.whatsapp !== undefined) {
-      existing.whatsapp = payload.whatsapp;
+    if (
+      payload.whatsapp !== undefined
+    ) {
+      existing.whatsapp =
+        payload.whatsapp;
     }
 
-    if (payload.address !== undefined) {
-      existing.address = payload.address;
+    if (
+      payload.address !== undefined
+    ) {
+      existing.address =
+        payload.address;
     }
 
-    if (payload.city !== undefined) {
-      existing.city = payload.city;
+    if (
+      payload.city !== undefined
+    ) {
+      existing.city =
+        payload.city;
     }
 
-    if (payload.remarks !== undefined) {
-      existing.remarks = payload.remarks;
+    if (
+      payload.district !== undefined
+    ) {
+      existing.district =
+        payload.district;
+    }
+
+    if (
+      payload.province !== undefined
+    ) {
+      existing.province =
+        payload.province;
+    }
+
+    if (
+      payload.remarks !== undefined
+    ) {
+      existing.remarks =
+        payload.remarks;
     }
 
     existing.status = "pending";
-    existing.semester_status = "pending";
+
+    existing.semester_status =
+      "pending";
 
     await existing.save();
 
     return ok(res, existing);
   } catch (error) {
-    console.error("createRenewal error:", error);
+    console.error(
+      "createRenewal error:",
+      error
+    );
 
-    return fail(res, "Failed to submit renewal request");
+    return fail(
+      res,
+      error?.parent?.sqlMessage ||
+        "Failed to submit renewal request",
+      500
+    );
   }
 };
 
-// =========================
-// STUDENT: PROFILE IMAGE
-// =========================
-export const uploadMyProfileImage = async (req, res) => {
-  try {
-    const file =
-      req.file ||
-      req.files?.profileImage?.[0] ||
-      req.files?.profile_image?.[0];
+// ======================================================
+// STUDENT: UPDATE OWN PROFILE
+// ======================================================
 
-    if (!file) {
-      return fail(res, "Profile image is required", 400);
+export const updateMyProfile = async (
+  req,
+  res
+) => {
+  try {
+    const userId =
+      getAuthenticatedUserId(req);
+
+    if (!userId) {
+      return fail(
+        res,
+        "User ID missing from authentication token",
+        401
+      );
     }
 
-    const item = await Student.findOne({
-      where: {
-        userId: req.user.id,
-      },
-    });
+    const item =
+      await Student.findOne({
+        where: {
+          userId,
+        },
+      });
 
     if (!item) {
       return fail(
         res,
-        "Submit admission form before uploading profile image",
+        "Student record not found",
         404
       );
     }
 
-    item.profile_image_url = getUploadedFilePath(file);
-
-    await item.save();
-
-    return ok(res, {
-      message: "Profile image updated successfully",
-      profileImage: item.profile_image_url,
-      student: item,
-    });
-  } catch (error) {
-    console.error("uploadMyProfileImage error:", error);
-
-    return fail(res, "Failed to upload profile image");
-  }
-};
-
-// =========================
-// STUDENT: UPLOAD DOCUMENTS
-// =========================
-export const uploadMyDocuments = async (req, res) => {
-  try {
-    const item = await Student.findOne({
-      where: {
-        userId: req.user.id,
-      },
-    });
-
-    if (!item) {
-      return fail(
-        res,
-        "Submit admission form before uploading documents",
-        404
+    const payload =
+      normalizeAdmissionPayload(
+        req.body || {}
       );
-    }
 
-    const payload = applyUploadedFiles({}, req);
-
-    const allowedFields = [
-      "profile_image_url",
-      "student_document_url",
-      "father_cnic_document_url",
-      "educational_document_url",
+    const selfEditableFields = [
+      "phone",
+      "whatsapp",
+      "emergency_contact_name",
+      "emergency_contact_phone",
+      "address",
+      "city",
+      "district",
+      "province",
+      "activities",
+      "medical_condition",
+      "remarks",
     ];
 
-    let updated = false;
+    const updateData =
+      pickAllowedFields(
+        payload,
+        selfEditableFields
+      );
 
-    for (const field of allowedFields) {
-      if (payload[field]) {
-        item[field] = payload[field];
-        updated = true;
-      }
-    }
-
-    if (!updated) {
-      return fail(res, "No document was uploaded", 400);
+    for (
+      const [field, value]
+      of Object.entries(updateData)
+    ) {
+      item[field] = value;
     }
 
     await item.save();
 
     return ok(res, {
-      message: "Student documents uploaded successfully",
+      message:
+        "Profile updated successfully",
       student: item,
     });
   } catch (error) {
-    console.error("uploadMyDocuments error:", error);
+    console.error(
+      "updateMyProfile error:",
+      error
+    );
 
-    return fail(res, "Failed to upload student documents");
+    return fail(
+      res,
+      error?.parent?.sqlMessage ||
+        "Failed to update profile",
+      500
+    );
   }
 };
 
-// =========================
+// ======================================================
+// STUDENT: UPLOAD PROFILE IMAGE
+// ======================================================
+
+export const uploadMyProfileImage =
+  async (req, res) => {
+    try {
+      const userId =
+        getAuthenticatedUserId(req);
+
+      if (!userId) {
+        return fail(
+          res,
+          "User ID missing from authentication token",
+          401
+        );
+      }
+
+      const file =
+        req.file ||
+        req.files?.profileImage?.[0] ||
+        req.files?.profile_image?.[0];
+
+      if (!file) {
+        return fail(
+          res,
+          "Profile image is required",
+          400
+        );
+      }
+
+      const item =
+        await Student.findOne({
+          where: {
+            userId,
+          },
+        });
+
+      if (!item) {
+        return fail(
+          res,
+          "Submit admission form before uploading profile image",
+          404
+        );
+      }
+
+      item.profile_image_url =
+        getUploadedFilePath(file);
+
+      await item.save();
+
+      return ok(res, {
+        message:
+          "Profile image updated successfully",
+        profileImage:
+          item.profile_image_url,
+        student: item,
+      });
+    } catch (error) {
+      console.error(
+        "uploadMyProfileImage error:",
+        error
+      );
+
+      return fail(
+        res,
+        error?.parent?.sqlMessage ||
+          "Failed to upload profile image",
+        500
+      );
+    }
+  };
+
+// ======================================================
+// STUDENT: UPLOAD DOCUMENTS
+// ======================================================
+
+export const uploadMyDocuments =
+  async (req, res) => {
+    try {
+      const userId =
+        getAuthenticatedUserId(req);
+
+      if (!userId) {
+        return fail(
+          res,
+          "User ID missing from authentication token",
+          401
+        );
+      }
+
+      const item =
+        await Student.findOne({
+          where: {
+            userId,
+          },
+        });
+
+      if (!item) {
+        return fail(
+          res,
+          "Submit admission form before uploading documents",
+          404
+        );
+      }
+
+      const payload =
+        applyUploadedFiles({}, req);
+
+      const documentFields = [
+        "profile_image_url",
+        "student_document_url",
+        "father_cnic_document_url",
+        "educational_document_url",
+      ];
+
+      let updated = false;
+
+      for (
+        const field
+        of documentFields
+      ) {
+        if (payload[field]) {
+          item[field] =
+            payload[field];
+
+          updated = true;
+        }
+      }
+
+      if (!updated) {
+        return fail(
+          res,
+          "No document was uploaded",
+          400
+        );
+      }
+
+      await item.save();
+
+      return ok(res, {
+        message:
+          "Student documents uploaded successfully",
+        student: item,
+      });
+    } catch (error) {
+      console.error(
+        "uploadMyDocuments error:",
+        error
+      );
+
+      return fail(
+        res,
+        error?.parent?.sqlMessage ||
+          "Failed to upload student documents",
+        500
+      );
+    }
+  };
+
+// ======================================================
 // ADMIN: UPDATE STUDENT
-// =========================
-export const updateStudent = async (req, res) => {
+// ======================================================
+
+export const updateStudent = async (
+  req,
+  res
+) => {
   try {
     const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return fail(res, "Invalid student ID", 400);
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+      return fail(
+        res,
+        "Invalid student ID",
+        400
+      );
     }
 
-    let payload = normalizeAdmissionPayload(req.body || {});
-    payload = applyUploadedFiles(payload, req);
+    let payload =
+      normalizeAdmissionPayload(
+        req.body || {}
+      );
 
-    const item = await Student.findByPk(id);
+    payload = applyUploadedFiles(
+      payload,
+      req
+    );
+
+    const item =
+      await Student.findByPk(id);
 
     if (!item) {
-      return fail(res, "Student not found", 404);
+      return fail(
+        res,
+        "Student not found",
+        404
+      );
     }
 
     if (
       payload.status !== undefined &&
       payload.status !== null &&
-      !ADMISSION_STATUSES.includes(payload.status)
+      !ADMISSION_STATUSES.includes(
+        payload.status
+      )
     ) {
-      return fail(res, "Invalid admission status", 400);
+      return fail(
+        res,
+        "Invalid admission status",
+        400
+      );
     }
 
     if (
-      payload.semester_status !== undefined &&
+      payload.semester_status !==
+        undefined &&
       payload.semester_status !== null &&
       !SEMESTER_STATUSES.includes(
         payload.semester_status
       )
     ) {
-      return fail(res, "Invalid semester status", 400);
+      return fail(
+        res,
+        "Invalid semester status",
+        400
+      );
     }
 
     if (
-      payload.course_applied_for !== undefined &&
-      payload.course_applied_for !== null &&
-      !COURSES.includes(payload.course_applied_for)
+      payload.course_applied_for !==
+        undefined &&
+      payload.course_applied_for !==
+        null &&
+      !COURSES.includes(
+        payload.course_applied_for
+      )
     ) {
-      return fail(res, "Invalid course selected", 400);
+      return fail(
+        res,
+        "Invalid course selected",
+        400
+      );
     }
 
-    const editableFields = [
-      "name",
-      "father_name",
-      "dob",
-      "age",
-      "gender",
-      "marital_status",
+    if (
+      payload.course_applied_for ===
+        "Other" &&
+      !payload.other_course
+    ) {
+      return fail(
+        res,
+        "Please enter the other course name",
+        400
+      );
+    }
 
-      "student_cnic",
-      "guardian_cnic",
+    const updateData =
+      pickAllowedFields(payload);
 
-      "phone",
-      "whatsapp",
-      "address",
-      "city",
-      "district",
-      "province",
-
-      "dini_education",
-      "prev_dini_institute",
-      "prev_school",
-      "previous_class",
-
-      "course_applied_for",
-      "other_course",
-      "activities",
-
-      "guardian_name",
-      "guardian_profession",
-      "guardian_phone",
-      "relation",
-
-      "guarantor_name",
-      "guarantor_profession",
-      "guarantor_phone",
-
-      "profile_image_url",
-      "student_document_url",
-      "father_cnic_document_url",
-      "educational_document_url",
-
-      "admission_date",
-      "renewal_date",
-      "current_semester",
-      "semester_no",
-      "semester_status",
-      "status",
-      "remarks",
-    ];
-
-    for (const field of editableFields) {
-      if (payload[field] !== undefined) {
-        item[field] = payload[field];
-      }
+    for (
+      const [field, value]
+      of Object.entries(updateData)
+    ) {
+      item[field] = value;
     }
 
     await item.save();
 
     return ok(res, item);
   } catch (error) {
-    console.error("updateStudent error:", error);
+    console.error(
+      "updateStudent error:",
+      error
+    );
+
     console.error(
       "updateStudent SQL error:",
       error?.parent?.sqlMessage
@@ -724,36 +1306,64 @@ export const updateStudent = async (req, res) => {
     return fail(
       res,
       error?.parent?.sqlMessage ||
-        "Failed to update student"
+        "Failed to update student",
+      500
     );
   }
 };
 
-// =========================
+// ======================================================
 // ADMIN: DELETE STUDENT
-// =========================
-export const deleteStudent = async (req, res) => {
+// ======================================================
+
+export const deleteStudent = async (
+  req,
+  res
+) => {
   try {
     const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return fail(res, "Invalid student ID", 400);
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+      return fail(
+        res,
+        "Invalid student ID",
+        400
+      );
     }
 
-    const deleted = await Student.destroy({
-      where: { id },
-    });
+    const deleted =
+      await Student.destroy({
+        where: {
+          id,
+        },
+      });
 
     if (!deleted) {
-      return fail(res, "Student not found", 404);
+      return fail(
+        res,
+        "Student not found",
+        404
+      );
     }
 
     return ok(res, {
-      message: "Student deleted successfully",
+      message:
+        "Student deleted successfully",
     });
   } catch (error) {
-    console.error("deleteStudent error:", error);
+    console.error(
+      "deleteStudent error:",
+      error
+    );
 
-    return fail(res, "Failed to delete student");
+    return fail(
+      res,
+      error?.parent?.sqlMessage ||
+        "Failed to delete student",
+      500
+    );
   }
 };
