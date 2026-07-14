@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import fs from "fs";
 
 import authRoutes from "./routes/authRoutes.js";
 import bayanRoutes from "./routes/bayanRoutes.js";
@@ -34,8 +36,38 @@ app.use(
   })
 );
 
-// Uploaded files
-app.use("/uploads", express.static("uploads"));
+// ======================================================
+// Uploaded Files
+// Must stay before API routes and 404 handler
+// ======================================================
+
+const uploadsPath = path.join(
+  process.cwd(),
+  "uploads"
+);
+
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, {
+    recursive: true,
+  });
+}
+
+app.use(
+  "/uploads",
+  express.static(uploadsPath, {
+    fallthrough: true,
+    maxAge: "1d",
+  })
+);
+
+// Optional diagnostic route
+app.get("/uploads-check", (req, res) => {
+  res.json({
+    success: true,
+    uploadsPath,
+    directoryExists: fs.existsSync(uploadsPath),
+  });
+});
 
 // ======================================================
 // Root
@@ -66,7 +98,7 @@ app.get("/privacy-policy", async (req, res) => {
       policy?.content ||
       "Privacy Policy will be updated soon.";
 
-    res.send(`
+    return res.send(`
 <!DOCTYPE html>
 <html>
 <head>
@@ -76,55 +108,53 @@ app.get("/privacy-policy", async (req, res) => {
 <title>${title}</title>
 
 <style>
-
-body{
-background:#f5f7fb;
-font-family:Arial,sans-serif;
-padding:30px;
+body {
+  background: #f5f7fb;
+  font-family: Arial, sans-serif;
+  padding: 30px;
 }
 
-.container{
-max-width:900px;
-margin:auto;
-background:#fff;
-padding:30px;
-border-radius:20px;
-box-shadow:0 5px 20px rgba(0,0,0,.08);
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,.08);
 }
 
-h1{
-color:#0D8B6F;
-margin-bottom:20px;
+h1 {
+  color: #0D8B6F;
+  margin-bottom: 20px;
 }
 
-pre{
-white-space:pre-wrap;
-font-family:inherit;
-line-height:1.7;
+pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+  line-height: 1.7;
 }
-
 </style>
-
 </head>
 
 <body>
-
 <div class="container">
-
-<h1>${title}</h1>
-
-<pre>${content}</pre>
-
+  <h1>${title}</h1>
+  <pre>${content}</pre>
 </div>
-
 </body>
-
 </html>
-`);
+    `);
   } catch (error) {
-    console.error(error);
+    console.error(
+      "Privacy policy error:",
+      error
+    );
 
-    res.status(500).send("Unable to load privacy policy.");
+    return res
+      .status(500)
+      .send(
+        "Unable to load privacy policy."
+      );
   }
 });
 
@@ -133,37 +163,32 @@ line-height:1.7;
 // ======================================================
 
 app.use("/api/auth", authRoutes);
-
 app.use("/api/bayans", bayanRoutes);
-
-app.use("/api/announcements", announcementRoutes);
-
+app.use(
+  "/api/announcements",
+  announcementRoutes
+);
 app.use("/api/students", studentRoutes);
-
 app.use("/api/books", bookRoutes);
-
 app.use("/api/zikar", zikarRoutes);
-
 app.use("/api/namaz", namazRoutes);
-
 app.use("/api/quran", quranRoutes);
-
 app.use("/api/contact", contactRoutes);
-
 app.use("/api/weather", weatherRoutes);
-
 app.use("/api/youtube", youtubeRoutes);
-
 app.use("/api/banners", bannerRoutes);
-
-app.use("/api/admin-content", adminContentRoutes);
+app.use(
+  "/api/admin-content",
+  adminContentRoutes
+);
 
 // ======================================================
 // 404 Handler
+// Always after static files and API routes
 // ======================================================
 
-app.use("*", (req, res) => {
-  res.status(404).json({
+app.use((req, res) => {
+  return res.status(404).json({
     success: false,
     message: "API endpoint not found.",
   });
