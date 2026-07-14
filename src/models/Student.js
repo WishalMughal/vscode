@@ -5,19 +5,11 @@ class Student extends Model {}
 
 Student.init(
   {
-    // =====================================================
-    // PRIMARY KEY
-    // =====================================================
-
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
     },
-
-    // =====================================================
-    // BASIC INFORMATION
-    // =====================================================
 
     name: {
       type: DataTypes.STRING(120),
@@ -32,6 +24,7 @@ Student.init(
     dob: {
       type: DataTypes.DATEONLY,
       allowNull: true,
+      field: "date_of_birth",
     },
 
     age: {
@@ -41,26 +34,45 @@ Student.init(
 
     gender: {
       type: DataTypes.ENUM(
-        "Male",
-        "Female",
-        "Other"
+        "male",
+        "female",
+        "other"
       ),
       allowNull: true,
+      defaultValue: "male",
     },
 
     marital_status: {
       type: DataTypes.ENUM(
-        "Single",
-        "Married"
+        "single",
+        "married"
       ),
+      allowNull: true,
+      defaultValue: "single",
+    },
+
+    student_cnic: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+      field: "student_b_form_or_cnic",
+    },
+
+    cnic: {
+      type: DataTypes.STRING(30),
       allowNull: true,
     },
 
-    // =====================================================
-    // CNIC / B-FORM
-    // =====================================================
+    guardian_name: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
 
-    student_cnic: {
+    guardian_profession: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
+
+    guardian_phone: {
       type: DataTypes.STRING(30),
       allowNull: true,
     },
@@ -70,9 +82,26 @@ Student.init(
       allowNull: true,
     },
 
-    // =====================================================
-    // CONTACT
-    // =====================================================
+    relation: {
+      type: DataTypes.STRING(80),
+      allowNull: true,
+      field: "guardian_relation",
+    },
+
+    guarantor_name: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
+
+    guarantor_profession: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
+
+    guarantor_phone: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
 
     phone: {
       type: DataTypes.STRING(30),
@@ -82,10 +111,21 @@ Student.init(
     whatsapp: {
       type: DataTypes.STRING(30),
       allowNull: true,
+      field: "whatsapp_number",
+    },
+
+    emergency_contact_name: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
+
+    emergency_contact_phone: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
     },
 
     address: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
 
@@ -104,11 +144,12 @@ Student.init(
       allowNull: true,
     },
 
-    // =====================================================
-    // EDUCATION
-    // =====================================================
-
     dini_education: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    asri_education: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
@@ -116,40 +157,23 @@ Student.init(
     prev_dini_institute: {
       type: DataTypes.STRING(255),
       allowNull: true,
+      field: "previous_dini_institute",
     },
 
     prev_school: {
       type: DataTypes.STRING(255),
       allowNull: true,
+      field: "previous_asri_institute",
     },
 
     previous_class: {
       type: DataTypes.STRING(120),
       allowNull: true,
+      field: "previous_class_or_degree",
     },
 
-    // =====================================================
-    // COURSE
-    // =====================================================
-
     course_applied_for: {
-      type: DataTypes.ENUM(
-        "Dars e Nizami",
-        "Shoba e Hifz o Nazra",
-        "Shoba e Banat",
-        "Al Abbasi Islamic Education System",
-        "Takhassus",
-        "Taleem e deen course",
-        "Dora e Tafseer",
-        "Dora e Tadrebiyyah",
-        "Dora Lugat e Arabi",
-        "Dora e Sarf o Nahw",
-        "English Language Course",
-        "Dora e Tajweed",
-        "Taleem o Tarbiyat",
-        "Quiz Program",
-        "Other"
-      ),
+      type: DataTypes.STRING(120),
       allowNull: true,
     },
 
@@ -161,86 +185,56 @@ Student.init(
     activities: {
       type: DataTypes.TEXT,
       allowNull: true,
+      field: "other_activities",
     },
 
-    // =====================================================
-    // GUARDIAN
-    // =====================================================
-
-    guardian_name: {
-      type: DataTypes.STRING(150),
+    medical_condition: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
 
-    guardian_profession: {
-      type: DataTypes.STRING(150),
+    passport_photo_url: {
+      type: DataTypes.STRING(300),
       allowNull: true,
     },
-
-    guardian_phone: {
-      type: DataTypes.STRING(30),
-      allowNull: true,
-    },
-
-    relation: {
-      type: DataTypes.STRING(80),
-      allowNull: true,
-    },
-
-    // =====================================================
-    // GUARANTOR
-    // =====================================================
-
-    guarantor_name: {
-      type: DataTypes.STRING(150),
-      allowNull: true,
-    },
-
-    guarantor_profession: {
-      type: DataTypes.STRING(150),
-      allowNull: true,
-    },
-
-    guarantor_phone: {
-      type: DataTypes.STRING(30),
-      allowNull: true,
-    },
-
-    // =====================================================
-    // DOCUMENTS
-    // =====================================================
 
     profile_image_url: {
       type: DataTypes.STRING(500),
       allowNull: true,
+      field: "profile_image",
     },
 
     student_document_url: {
       type: DataTypes.STRING(500),
       allowNull: true,
+      field: "student_document",
     },
 
     father_cnic_document_url: {
       type: DataTypes.STRING(500),
       allowNull: true,
+      field: "father_cnic_document",
     },
 
     educational_document_url: {
       type: DataTypes.STRING(500),
       allowNull: true,
+      field: "educational_document",
     },
 
-    // =====================================================
-    // SEMESTER
-    // =====================================================
+    document_notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
 
-    current_semester: {
-      type: DataTypes.INTEGER,
-      defaultValue: 1,
+    admission_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
 
     semester_no: {
       type: DataTypes.INTEGER,
+      allowNull: true,
       defaultValue: 1,
     },
 
@@ -249,19 +243,11 @@ Student.init(
         "pending",
         "active",
         "completed",
-        "passed",
-        "failed"
+        "failed",
+        "passed"
       ),
-      defaultValue: "pending",
-    },
-
-    // =====================================================
-    // RESULT
-    // =====================================================
-
-    semester_result: {
-      type: DataTypes.TEXT,
       allowNull: true,
+      defaultValue: "pending",
     },
 
     semester_result_pdf: {
@@ -269,12 +255,8 @@ Student.init(
       allowNull: true,
     },
 
-    // =====================================================
-    // ADMISSION
-    // =====================================================
-
-    admission_date: {
-      type: DataTypes.DATE,
+    semester_result: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
 
@@ -285,14 +267,13 @@ Student.init(
 
     status: {
       type: DataTypes.ENUM(
-        "pending",
-        "approved",
         "active",
-        "rejected",
-        "inactive",
+        "pending",
         "blocked",
+        "rejected",
         "graduated"
       ),
+      allowNull: true,
       defaultValue: "pending",
     },
 
@@ -300,10 +281,6 @@ Student.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-
-    // =====================================================
-    // RELATIONS
-    // =====================================================
 
     userId: {
       type: DataTypes.INTEGER,
