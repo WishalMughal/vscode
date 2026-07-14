@@ -2,70 +2,325 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/db.js";
 
 class Student extends Model {}
+
 Student.init(
   {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    // =====================================================
+    // PRIMARY KEY
+    // =====================================================
 
-    // Basic student info
-    name: { type: DataTypes.STRING(120), allowNull: false },
-    father_name: { type: DataTypes.STRING(120) },
-    date_of_birth: { type: DataTypes.DATEONLY },
-    age: { type: DataTypes.INTEGER },
-    gender: { type: DataTypes.ENUM("male", "female", "other"), defaultValue: "male" },
-    marital_status: { type: DataTypes.ENUM("single", "married"), defaultValue: "single" },
-    student_b_form_or_cnic: { type: DataTypes.STRING(30) },
-    cnic: { type: DataTypes.STRING(30) },
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
 
-    // Guardian / guarantor
-    guardian_name: { type: DataTypes.STRING(120) },
-    guardian_profession: { type: DataTypes.STRING(120) },
-    guardian_phone: { type: DataTypes.STRING(30) },
-    guardian_cnic: { type: DataTypes.STRING(30) },
-    guardian_relation: { type: DataTypes.STRING(80) },
-    guarantor_name: { type: DataTypes.STRING(120) },
-    guarantor_profession: { type: DataTypes.STRING(120) },
-    guarantor_phone: { type: DataTypes.STRING(30) },
+    // =====================================================
+    // BASIC INFORMATION
+    // =====================================================
 
-    // Contact / address
-    phone: { type: DataTypes.STRING(30) },
-    whatsapp_number: { type: DataTypes.STRING(30) },
-    emergency_contact_name: { type: DataTypes.STRING(120) },
-    emergency_contact_phone: { type: DataTypes.STRING(30) },
-    address: { type: DataTypes.STRING(255) },
-    city: { type: DataTypes.STRING(100) },
-    district: { type: DataTypes.STRING(100) },
-    province: { type: DataTypes.STRING(100) },
+    name: {
+      type: DataTypes.STRING(120),
+      allowNull: false,
+    },
 
-    // Education details
-    dini_education: { type: DataTypes.TEXT },
-    asri_education: { type: DataTypes.TEXT },
-    previous_dini_institute: { type: DataTypes.STRING(255) },
-    previous_asri_institute: { type: DataTypes.STRING(255) },
-    previous_class_or_degree: { type: DataTypes.STRING(120) },
-    course_applied_for: { type: DataTypes.STRING(120), defaultValue: "درس نظامی" },
+    father_name: {
+      type: DataTypes.STRING(120),
+      allowNull: false,
+    },
 
-    // Other details
-    other_activities: { type: DataTypes.TEXT },
-    medical_condition: { type: DataTypes.TEXT },
-    hostel_required: { type: DataTypes.BOOLEAN, defaultValue: false },
-    transport_required: { type: DataTypes.BOOLEAN, defaultValue: false },
-    passport_photo_url: { type: DataTypes.STRING(300) },
-    document_notes: { type: DataTypes.TEXT },
+    dob: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
 
-    // Admission workflow
-    admission_date: { type: DataTypes.DATE },
-    semester_no: { type: DataTypes.INTEGER, defaultValue: 1 },
-    renewal_date: { type: DataTypes.DATE },
-    status: {
-      type: DataTypes.ENUM("active", "pending", "blocked", "rejected", "graduated"),
+    age: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    gender: {
+      type: DataTypes.ENUM(
+        "Male",
+        "Female",
+        "Other"
+      ),
+      allowNull: true,
+    },
+
+    marital_status: {
+      type: DataTypes.ENUM(
+        "Single",
+        "Married"
+      ),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // CNIC / B-FORM
+    // =====================================================
+
+    student_cnic: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+
+    guardian_cnic: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // CONTACT
+    // =====================================================
+
+    phone: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+
+    whatsapp: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    city: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+
+    district: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+
+    province: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // EDUCATION
+    // =====================================================
+
+    dini_education: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    prev_dini_institute: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+
+    prev_school: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+
+    previous_class: {
+      type: DataTypes.STRING(120),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // COURSE
+    // =====================================================
+
+    course_applied_for: {
+      type: DataTypes.ENUM(
+        "Dars e Nizami",
+        "Shoba e Hifz o Nazra",
+        "Shoba e Banat",
+        "Al Abbasi Islamic Education System",
+        "Takhassus",
+        "Taleem e deen course",
+        "Dora e Tafseer",
+        "Dora e Tadrebiyyah",
+        "Dora Lugat e Arabi",
+        "Dora e Sarf o Nahw",
+        "English Language Course",
+        "Dora e Tajweed",
+        "Taleem o Tarbiyat",
+        "Quiz Program",
+        "Other"
+      ),
+      allowNull: true,
+    },
+
+    other_course: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
+    },
+
+    activities: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    // =====================================================
+    // GUARDIAN
+    // =====================================================
+
+    guardian_name: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+    },
+
+    guardian_profession: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+    },
+
+    guardian_phone: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+
+    relation: {
+      type: DataTypes.STRING(80),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // GUARANTOR
+    // =====================================================
+
+    guarantor_name: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+    },
+
+    guarantor_profession: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+    },
+
+    guarantor_phone: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // DOCUMENTS
+    // =====================================================
+
+    profile_image_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+
+    student_document_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+
+    father_cnic_document_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+
+    educational_document_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // SEMESTER
+    // =====================================================
+
+    current_semester: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+    },
+
+    semester_no: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+    },
+
+    semester_status: {
+      type: DataTypes.ENUM(
+        "pending",
+        "active",
+        "completed",
+        "passed",
+        "failed"
+      ),
       defaultValue: "pending",
     },
-    remarks: { type: DataTypes.TEXT },
 
-    // Link student record with an authenticated student user
-    userId: { type: DataTypes.INTEGER },
-    createdBy: { type: DataTypes.INTEGER },
+    // =====================================================
+    // RESULT
+    // =====================================================
+
+    semester_result: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    semester_result_pdf: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+    },
+
+    // =====================================================
+    // ADMISSION
+    // =====================================================
+
+    admission_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    renewal_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
+    status: {
+      type: DataTypes.ENUM(
+        "pending",
+        "approved",
+        "active",
+        "rejected",
+        "inactive",
+        "blocked",
+        "graduated"
+      ),
+      defaultValue: "pending",
+    },
+
+    remarks: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    // =====================================================
+    // RELATIONS
+    // =====================================================
+
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
-  { sequelize, modelName: "Student", tableName: "students", timestamps: true }
+  {
+    sequelize,
+    modelName: "Student",
+    tableName: "students",
+    timestamps: true,
+  }
 );
+
 export default Student;
