@@ -16,6 +16,7 @@ import weatherRoutes from "./routes/weatherRoutes.js";
 import youtubeRoutes from "./routes/youtubeRoutes.js";
 import adminContentRoutes from "./routes/adminContentRoutes.js";
 import bannerRoutes from "./routes/bannerRoutes.js";
+import exportRoutes from "./routes/exportRoutes.js";
 
 import { PrivacyPolicy } from "./models/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
@@ -377,6 +378,7 @@ app.use(
   "/api/admin-content",
   adminContentRoutes
 );
+app.use("/api/export", exportRoutes);
 
 // ======================================================
 // 404 Handler
