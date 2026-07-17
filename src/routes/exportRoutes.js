@@ -7,11 +7,7 @@ import {
 
 const router = Router();
 
-// ==========================================
-// ADMIN EXPORT ROUTES
-// ==========================================
-
-// Download all student records as Excel
+// Admin-only student Excel export
 router.get(
   "/students",
   auth(["admin"]),
