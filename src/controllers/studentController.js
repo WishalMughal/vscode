@@ -22,19 +22,23 @@ const COURSES = [
 // Must match students.status ENUM in MySQL.
 const ADMISSION_STATUSES = [
   "pending",
+  "approved",
   "active",
+  "suspended",
+  "inactive",
   "blocked",
   "rejected",
   "graduated",
 ];
 
-// Must match students.semester_status ENUM.
 const SEMESTER_STATUSES = [
   "pending",
   "active",
   "completed",
   "passed",
   "failed",
+  "on_hold",
+  "cancelled",
 ];
 
 const EDITABLE_FIELDS = [
@@ -74,9 +78,6 @@ const EDITABLE_FIELDS = [
   "guardian_phone",
   "relation",
 
-  "guarantor_name",
-  "guarantor_profession",
-  "guarantor_phone",
 
   "passport_photo_url",
   "profile_image_url",

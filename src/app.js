@@ -309,7 +309,35 @@ app.get(
     }
   }
 );
-
+app.get(
+  "/api/debug/student-statuses",
+  (req, res) => {
+    return res.json({
+      success: true,
+      version:
+        "student-status-fix-2026-07-18-v3",
+      admissionStatuses: [
+        "pending",
+        "approved",
+        "active",
+        "suspended",
+        "inactive",
+        "blocked",
+        "rejected",
+        "graduated",
+      ],
+      semesterStatuses: [
+        "pending",
+        "active",
+        "completed",
+        "passed",
+        "failed",
+        "on_hold",
+        "cancelled",
+      ],
+    });
+  }
+);
 // ======================================================
 // API Routes
 // ======================================================

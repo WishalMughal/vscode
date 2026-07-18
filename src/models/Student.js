@@ -238,17 +238,19 @@ Student.init(
       defaultValue: 1,
     },
 
-    semester_status: {
-      type: DataTypes.ENUM(
-        "pending",
-        "active",
-        "completed",
-        "failed",
-        "passed"
-      ),
-      allowNull: true,
-      defaultValue: "pending",
-    },
+   semester_status: {
+  type: DataTypes.ENUM(
+    "pending",
+    "active",
+    "completed",
+    "passed",
+    "failed",
+    "on_hold",
+    "cancelled"
+  ),
+  allowNull: false,
+  defaultValue: "pending",
+},
 
     semester_result_pdf: {
       type: DataTypes.STRING(500),
@@ -265,17 +267,20 @@ Student.init(
       allowNull: true,
     },
 
-    status: {
-      type: DataTypes.ENUM(
-        "active",
-        "pending",
-        "blocked",
-        "rejected",
-        "graduated"
-      ),
-      allowNull: true,
-      defaultValue: "pending",
-    },
+   status: {
+  type: DataTypes.ENUM(
+    "pending",
+    "approved",
+    "active",
+    "suspended",
+    "inactive",
+    "blocked",
+    "rejected",
+    "graduated"
+  ),
+  allowNull: false,
+  defaultValue: "pending",
+},
 
     remarks: {
       type: DataTypes.TEXT,
